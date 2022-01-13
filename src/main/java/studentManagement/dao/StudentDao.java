@@ -13,13 +13,13 @@ import studentManagement.bean.Student;
 
 public class StudentDao {
  
-	private String jdbcURL="jdbc:mysql://localhost:3306/userdb?userSSL=false";
+	private String jdbcURL="jdbc:mysql://localhost:3306/userdb?userSSL=false"; 
 	private String jdbcUsername="root";
-	private String jdbcPassword="user";
+	private String jdbcPassword="root";
 	private String jdbcDriver="com.mysql.jdbc.Driver";
+	//rootpassword@123
 	
 	private static final String INSERT_STUDENTS_SQL ="INSERT INTO Students"+" (name, email, age) VALUES "+"(?,?,?);";
-	
 	private static final String SELECT_STUDENT_BY_ID ="Select id, name, email,age from students where id=?";
 	private static final String SELECT_ALL_STUDENTS = "select * from students";
 	private static final String DELETE_STUDENT_SQL="delete from students where id=?;";
@@ -27,7 +27,7 @@ public class StudentDao {
 	
 	public StudentDao() {}
 	
-	protected Connection getConnection() {
+	protected Connection getConnection() throws ClassNotFoundException {
 		Connection connection=null;
 		try {
 			Class.forName("jdbcDriver");
@@ -40,7 +40,7 @@ public class StudentDao {
 	
 	
 	//insert students
-	public void insertStudent(Student student) throws SQLException{
+	public void insertStudent(Student student) throws SQLException, ClassNotFoundException{
 		System.out.println(INSERT_STUDENTS_SQL);
 		try (Connection connection= getConnection();
 				PreparedStatement ps=connection.prepareStatement(INSERT_STUDENTS_SQL)){
@@ -58,9 +58,27 @@ public class StudentDao {
 	}
 	
 	//select student by id
+	public Student getStudentById(int id) throws SQLException, ClassNotFoundException{
+		Student student = null;
+		try (
+			Connection connection = getConnection();
+			PreparedStatement ps = connection.prepareStatement(SELECT_STUDENT_BY_ID);){
+			ps.setInt(1, id);
+			ResultSet rs = ps.executeQuery();
+			
+			while(rs.next()) {
+				student = new Student();
+				student.setId(rs.getInt("id"));
+				student.setName(rs.getString("name"));
+				student.setEmail(rs.getString("email"));
+				student.setAge(rs.getInt("age"));
+			}						
+		}		
+		return student;
+	}
 	
 	//select all students
-	public List<Student> getAllStudent() throws SQLException{
+	public List<Student> getAllStudent() throws SQLException, ClassNotFoundException{
 		List<Student> studentList = new ArrayList<>();
 		try {
 			Connection connection = getConnection();
@@ -84,15 +102,25 @@ public class StudentDao {
 			printSQLException(e);
 			//e.printStackTrace();  
 		}
-		return studentList;
-		
-		
+		return studentList;				
 	}
 	
 	//update student
+	public boolean updateStudent(Student student) throws SQLException, ClassNotFoundException{
+		boolean recordUpdated;
+		try(Connection connection = getConnection();
+				PreparedStatement ps = connection.prepareStatement(UPDATE_STUDENTS_SQL);){
+			System.out.println("Student has been updated:"+ps);
+			ps.setString(1, student.getName());
+			ps.setString(2, student.getEmail());
+			ps.setInt(3, student.getAge());
+			recordUpdated = ps.executeUpdate()>0;
+		}
+		return recordUpdated;
+	}
 	
 	//delete student by id
-	public boolean deleteStudent(int id) throws SQLException {
+	public boolean deleteStudent(int id) throws SQLException, ClassNotFoundException {
 		boolean recordDeleted;
 		try (
 			Connection connection = getConnection();
@@ -102,11 +130,9 @@ public class StudentDao {
 			
 			//boolean recordDeleted;
 			
-			recordDeleted= ps.executeUpdate()>0;	
-				
+			recordDeleted= ps.executeUpdate()>0;					
 		}
-		return recordDeleted;
-		
+		return recordDeleted;		
 	}
 	
 	
