@@ -1,6 +1,7 @@
 package studentManagement.dao;
 
 import java.sql.Connection;
+
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -13,13 +14,13 @@ import studentManagement.bean.Student;
 
 public class StudentDao {
  
-	private String jdbcURL="jdbc:mysql://localhost:3306/userdb?userSSL=false"; 
+	private String jdbcURL="jdbc:mysql://localhost:3306/studentdb?userSSL=false"; 
 	private String jdbcUsername="root";
 	private String jdbcPassword="root";
 	private String jdbcDriver="com.mysql.jdbc.Driver";
 	//rootpassword@123
 	
-	private static final String INSERT_STUDENTS_SQL ="INSERT INTO Students"+" (name, email, age) VALUES "+"(?,?,?);";
+	private static final String INSERT_STUDENTS_SQL ="INSERT INTO students"+" (name, email, age) VALUES "+"(?,?,?);";
 	private static final String SELECT_STUDENT_BY_ID ="Select id, name, email,age from students where id=?";
 	private static final String SELECT_ALL_STUDENTS = "select * from students";
 	private static final String DELETE_STUDENT_SQL="delete from students where id=?;";
@@ -30,7 +31,7 @@ public class StudentDao {
 	protected Connection getConnection() throws ClassNotFoundException {
 		Connection connection=null;
 		try {
-			Class.forName("jdbcDriver");
+			Class.forName(jdbcDriver );
 			connection = DriverManager.getConnection(jdbcURL, jdbcUsername, jdbcPassword);
 		}catch(SQLException e) {
 			e.printStackTrace();
